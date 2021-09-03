@@ -6,17 +6,17 @@ import { ProductsService } from './products.service';
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
   @Post()
-  addProduct(
+  async addProduct(
     @Body('title') prodTitle: string,
     @Body('description') prodDesc: string,
     @Body('price') prodPrice: number,
-  ): any {
-    const generateId = this.productsService.insertProduct(
+  ): Promise<{ id: string }> {
+    const newProduct = await this.productsService.insertProduct(
       prodTitle,
       prodDesc,
       prodPrice,
     );
-    return { id: generateId };
+    return { id: newProduct };
   }
 
   @Get()

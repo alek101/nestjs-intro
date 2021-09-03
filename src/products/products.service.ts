@@ -1,4 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 
 import { Product } from './products.model';
 
@@ -6,16 +8,24 @@ import { Product } from './products.model';
 export class ProductsService {
   private products: Product[] = [];
 
-  insertProduct(title: string, desc: string, price: number): string {
-    const prodId = String(Math.floor(Math.random() * 1000));
-    const newProduct = new Product(prodId, title, desc, price);
-    console.log(newProduct);
-    this.products.push(newProduct);
-    return prodId;
+  constructor(
+    @InjectModel('Product') private readonly productModel: Model<Product>,
+  ) {}
+
+  async insertProduct(title: string, desc: string, price: number) {
+    const newProduct = new this.productModel({
+      title,
+      description: desc,
+      price,
+    });
+    const result = await newProduct.save();
+    return result.id as string;
   }
 
-  getProducts() {
-    return [...this.products];
+  async getProducts() {
+    const products = await this.productModel.find().exec();
+    console.log(products);
+    return [...products];
   }
 
   getSingleProduct(productId: string) {
